@@ -60,7 +60,7 @@
 		map: GraphMap;
 		edgeMap: EdgeMap;
 
-		_sorter = function (a: string, b: string) {
+		sorter = function (a: string, b: string) {
 			return parseFloat(a) - parseFloat(b);
 		};
 
@@ -94,8 +94,8 @@
 			this.edgeMap = edgeMap;
 		}
 
-		findShortestPath(viaNodes: string[]) {
-			return this._findShortestPath(this.map, viaNodes);
+		findPath(viaNodes: string[]) {
+			return this.findShortestPath(this.map, viaNodes);
 		}
 
 		convertNodesToEdges(nodes: string[]): string[] {
@@ -112,7 +112,7 @@
 			return edges;
 		}
 
-		_extractKeys(obj: object) {
+		extractKeys(obj: object) {
 			const keys = [];
 			let key;
 			for (key in obj) {
@@ -121,7 +121,7 @@
 			return keys;
 		}
 
-		_findPaths(map: GraphMap, start: string, end: string) {
+		findPaths(map: GraphMap, start: string, end: string) {
 			const costs: { [key: string]: number } = {};
 			const open: { [key: string]: string[] } = { 0: [start] };
 			const predecessors: { [key: string]: string } = {};
@@ -139,11 +139,11 @@
 
 			// eslint-disable-next-line no-unmodified-loop-condition
 			while (open) {
-				if (!(keys = this._extractKeys(open)).length) {
+				if (!(keys = this.extractKeys(open)).length) {
 					break;
 				}
 
-				keys.sort(this._sorter);
+				keys.sort(this.sorter);
 
 				const key = keys[0];
 				const bucket = open[key];
@@ -177,7 +177,7 @@
 			}
 		}
 
-		_extractShortest(predecessors: { [key: string]: string }, end: string) {
+		extractShortest(predecessors: { [key: string]: string }, end: string) {
 			const nodes = [];
 			let u = end;
 
@@ -190,7 +190,7 @@
 			return nodes;
 		}
 
-		_findShortestPath(map: GraphMap, nodes: string[]) {
+		findShortestPath(map: GraphMap, nodes: string[]) {
 			nodes = [...nodes]; // copy
 			let start = nodes.shift() || '';
 			let end: string;
@@ -200,10 +200,10 @@
 
 			while (nodes.length) {
 				end = nodes.shift() || '';
-				predecessors = this._findPaths(map, start, end);
+				predecessors = this.findPaths(map, start, end);
 
 				if (predecessors) {
-					shortest = this._extractShortest(predecessors, end);
+					shortest = this.extractShortest(predecessors, end);
 					if (nodes.length) {
 						path.push.apply(path, shortest.slice(0, -1));
 					} else {
@@ -223,7 +223,7 @@
 	const targetNode = ref('node12');
 	watchEffect(() => {
 		const graph = new Graph(data.edges);
-		const routeOfNodes = graph.findShortestPath(['node1', targetNode.value]);
+		const routeOfNodes = graph.findPath(['node1', targetNode.value]);
 		if (routeOfNodes) {
 			const routeOfEdges = graph.convertNodesToEdges(routeOfNodes);
 			paths.value = { shortestPath: { edges: routeOfEdges } };
